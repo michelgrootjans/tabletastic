@@ -4,15 +4,16 @@ module Tabletastic
   class TableField
     @@association_methods = %w[to_label display_name full_name name title username login value to_str to_s]
 
-    attr_reader :heading, :method, :method_or_proc, :cell_html, :heading_html, :klass
+    attr_reader :heading, :footer, :method, :method_or_proc, :cell_html, :heading_html, :footer_html, :klass
 
     def initialize(*args, &proc)
       options = args.extract_options!
       @method = args.first.to_sym
       @method_or_proc = block_given? ? proc : method
-      @cell_html, @heading_html = options[:cell_html], options[:heading_html]
+      @cell_html, @heading_html, @footer_html = options[:cell_html], options[:heading_html], options[:footer_html]
       @klass = options.delete(:klass)
       @heading = options.delete(:heading) || default_heading
+      @footer = options.delete(:footer) || ""
     end
 
     def cell_data(record)
@@ -25,6 +26,10 @@ module Tabletastic
       # Try to detect which method to use for stringifying the attribute
       to_string = detect_string_method(result)
       result.send(to_string) if to_string
+    end
+
+    def has_footer?
+      !@footer.blank?
     end
 
     private

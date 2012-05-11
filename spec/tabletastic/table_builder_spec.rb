@@ -24,6 +24,7 @@ describe Tabletastic::TableBuilder do
       it { should have_tag("table#posts") }
 
       it { output_buffer.should have_table_with_tag("thead") } 
+      it { output_buffer.should_not have_table_with_tag("tfoot") } 
 
       it "should have a <th> for each attribute" do
         # title and body
@@ -219,6 +220,7 @@ describe Tabletastic::TableBuilder do
       it { should have_table_with_tag("th", "Title") }
       it { should have_table_with_tag("th", "Created at") }
       it { should_not have_table_with_tag("th", "Body") }
+      it { should_not have_table_with_tag("tfoot") }
     end
 
     context "with a list of attributes and options[:actions]" do
@@ -252,6 +254,7 @@ describe Tabletastic::TableBuilder do
       it { should have_table_with_tag("th", "Title") }
       it { should have_tag("td", "The title of the post") }
       it { should have_tag("td", "Lorem ipsum") }
+      it { should_not have_table_with_tag("tfoot") }
     end
 
     context "with custom cell options" do
@@ -268,6 +271,7 @@ describe Tabletastic::TableBuilder do
 
       it { should have_table_with_tag("th", "FooBar") }
       it { should have_table_with_tag("th", "Body") }
+      it { output_buffer.should_not have_table_with_tag("tfoot") }
 
       it "should pass :cell_html to the cell" do
         output_buffer.should have_table_with_tag("td.batquux")
@@ -289,13 +293,33 @@ describe Tabletastic::TableBuilder do
       it { should have_table_with_tag("th:nth-child(1)", "Title") }
       it { should have_table_with_tag("th:nth-child(2)", "Content") }
       it { should have_table_with_tag("td:nth-child(2)", "Lorem ipsum") }
-      
+      it { should_not have_table_with_tag("tfoot") }
+
       it "accepts a block as a lazy attribute" do
         output_buffer.should have_table_with_tag("td:nth-child(1)") do |td|
           td.should have_tag("a", "The title of the post")
         end
       end
     end
+
+    context "with custom footer option" do
+      before do
+        concat(table_for(@posts) do |t|
+          t.data do
+            t.cell(:title, footer: "Count")
+            t.cell(:body, footer: :count)
+          end
+        end)
+      end
+
+      subject { output_buffer }
+
+      it { should have_table_with_tag("tfoot") }
+      it { should have_table_with_tag("td", "Count") }
+      it { should have_table_with_tag("td", "1") }
+    end
+
+
 
     context "with custom heading html option" do
       before do
@@ -307,6 +331,7 @@ describe Tabletastic::TableBuilder do
       end
       subject { output_buffer }
       it { should have_table_with_tag("th.hoja") }
+      it { should_not have_table_with_tag("tfoot") }
     end
 
     context "with options[:actions]" do

@@ -60,4 +60,10 @@ describe Tabletastic::TableField do
 
     end
   end
+
+  describe "#footer" do
+    subject { TableField.new(:method, footer: "Sum") }
+
+    it{ should have_footer}
+  end
 end

@@ -30,7 +30,7 @@ module Tabletastic
         @table_fields = args.empty? ? orm_fields : args.collect {|f| TableField.new(f.to_sym)}
       end
       action_cells(options[:actions], options[:action_prefix])
-      ["\n", head, "\n", body, "\n"].join("").html_safe
+      ["\n", head, "\n", body, "\n", footer, "\n"].join("").html_safe
     end
 
     # individually specify a column, which will build up the header,
@@ -83,6 +83,26 @@ module Tabletastic
           end + "\n"
         end.html_safe
       end
+    end
+
+    def footer
+      return nil unless has_footer?
+      content_tag(:tfoot) do
+        content_tag(:tr) do
+          @table_fields.inject("") do |result,field|
+            result + content_tag(:td, aggregate(field.footer), field.footer_html)
+          end.html_safe
+        end
+      end
+    end
+
+    def aggregate data_or_symbol
+      return data_or_symbol unless data_or_symbol.instance_of?(Symbol)
+      @collection.send(data_or_symbol)
+    end
+
+    def has_footer?
+      @table_fields.any?(&:has_footer?)
     end
 
     def cells_for_row(record)
