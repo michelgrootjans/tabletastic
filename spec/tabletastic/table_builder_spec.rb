@@ -302,21 +302,46 @@ describe Tabletastic::TableBuilder do
       end
     end
 
-    context "with custom footer option" do
+    context "with a simple footer" do
       before do
         concat(table_for(@posts) do |t|
           t.data do
-            t.cell(:title, footer: "Count")
-            t.cell(:body, footer: :count)
+            t.cell(:title, footer: "My custom footer")
           end
         end)
       end
 
       subject { output_buffer }
 
-      it { should have_table_with_tag("tfoot") }
-      it { should have_table_with_tag("td", "Count") }
-      it { should have_table_with_tag("td", "1") }
+      it { should have_tag("table tfoot tr td", "My custom footer") }
+    end
+
+    context "with a counter footer" do
+      before do
+        concat(table_for(@posts) do |t|
+          t.data do
+            t.cell(:title, footer: @posts.count)
+          end
+        end)
+      end
+
+      subject { output_buffer }
+
+      it { should have_tag("table tfoot tr td", "1") }
+    end
+
+    context "with a summing footer" do
+      before do
+        concat(table_for(@posts) do |t|
+          t.data do
+            t.cell(:id, footer: @posts.map(&:id).inject(&:+))
+          end
+        end)
+      end
+
+      subject { output_buffer }
+
+      it { should have_tag("table tfoot tr td", "2") }
     end
 
 

@@ -90,15 +90,10 @@ module Tabletastic
       content_tag(:tfoot) do
         content_tag(:tr) do
           @table_fields.inject("") do |result,field|
-            result + content_tag(:td, aggregate(field.footer), field.footer_html)
+            result + content_tag(:td, field.footer, field.footer_html)
           end.html_safe
         end
       end
-    end
-
-    def aggregate data_or_symbol
-      return data_or_symbol unless data_or_symbol.instance_of?(Symbol)
-      @collection.send(data_or_symbol)
     end
 
     def has_footer?
